@@ -139,18 +139,28 @@
 <a class="jxr_linenumber" name="L131" href="#L131">131</a>         <strong class="jxr_keyword">return</strong> includeSnapshots;
 <a class="jxr_linenumber" name="L132" href="#L132">132</a>     }
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 
-<a class="jxr_linenumber" name="L134" href="#L134">134</a>     <strong class="jxr_keyword">public</strong> LinkedList&lt;String&gt; findAll() <strong class="jxr_keyword">throws</strong> IOException {
-<a class="jxr_linenumber" name="L135" href="#L135">135</a>         <strong class="jxr_keyword">return</strong> loader.findAllVersions(<strong class="jxr_keyword">this</strong>)
-<a class="jxr_linenumber" name="L136" href="#L136">136</a>                 .stream()
-<a class="jxr_linenumber" name="L137" href="#L137">137</a>                 .map(Version::toString)
-<a class="jxr_linenumber" name="L138" href="#L138">138</a>                 .collect(Collectors.toCollection(LinkedList::<strong class="jxr_keyword">new</strong>));
-<a class="jxr_linenumber" name="L139" href="#L139">139</a>     }
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 
-<a class="jxr_linenumber" name="L141" href="#L141">141</a>     <strong class="jxr_keyword">public</strong> Optional&lt;String&gt; findBestMatch() <strong class="jxr_keyword">throws</strong> IOException {
-<a class="jxr_linenumber" name="L142" href="#L142">142</a>         LinkedList&lt;String&gt; versions = findAll();
-<a class="jxr_linenumber" name="L143" href="#L143">143</a>         <strong class="jxr_keyword">return</strong> versions.isEmpty() ? Optional.empty() : Optional.of(versions.getLast());
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_javadoccomment">     * Returns a list of all versions that match the search constraints.</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> <em class="jxr_javadoccomment">     * @return A list of versions. This list may be empty but is never null.</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_javadoccomment">     * @throws IOException If the underlying code encounters an IO problem (e.g. no network connection).</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>     <strong class="jxr_keyword">public</strong> LinkedList&lt;String&gt; findAll() <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>         <strong class="jxr_keyword">return</strong> loader.findAllVersions(<strong class="jxr_keyword">this</strong>)
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>                 .stream()
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>                 .map(Version::toString)
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>                 .collect(Collectors.toCollection(LinkedList::<strong class="jxr_keyword">new</strong>));
 <a class="jxr_linenumber" name="L144" href="#L144">144</a>     }
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> }
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">     * Returns the best match for the given version contraints.</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_javadoccomment">     * @return The best match for the given version constraints. Can be {@link Optional#empty()} if no version matches.</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_javadoccomment">     * @throws IOException If the underlying code encounters an IO problem (e.g. no network connection).</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>     <strong class="jxr_keyword">public</strong> Optional&lt;String&gt; findBestMatch() <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>         LinkedList&lt;String&gt; versions = findAll();
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>         <strong class="jxr_keyword">return</strong> versions.isEmpty() ? Optional.empty() : Optional.of(versions.getLast());
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>     }
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2021&#x2013;2023 <a href="https://github.com/hgschmie">Henning Schmiedehausen</a>. All rights reserved.</div>

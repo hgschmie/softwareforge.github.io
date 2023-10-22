@@ -144,18 +144,28 @@
 <span class="source-line-no">131</span><span id="line-131">        return includeSnapshots;</span>
 <span class="source-line-no">132</span><span id="line-132">    }</span>
 <span class="source-line-no">133</span><span id="line-133"></span>
-<span class="source-line-no">134</span><span id="line-134">    public LinkedList&lt;String&gt; findAll() throws IOException {</span>
-<span class="source-line-no">135</span><span id="line-135">        return loader.findAllVersions(this)</span>
-<span class="source-line-no">136</span><span id="line-136">                .stream()</span>
-<span class="source-line-no">137</span><span id="line-137">                .map(Version::toString)</span>
-<span class="source-line-no">138</span><span id="line-138">                .collect(Collectors.toCollection(LinkedList::new));</span>
-<span class="source-line-no">139</span><span id="line-139">    }</span>
-<span class="source-line-no">140</span><span id="line-140"></span>
-<span class="source-line-no">141</span><span id="line-141">    public Optional&lt;String&gt; findBestMatch() throws IOException {</span>
-<span class="source-line-no">142</span><span id="line-142">        LinkedList&lt;String&gt; versions = findAll();</span>
-<span class="source-line-no">143</span><span id="line-143">        return versions.isEmpty() ? Optional.empty() : Optional.of(versions.getLast());</span>
+<span class="source-line-no">134</span><span id="line-134">    /**</span>
+<span class="source-line-no">135</span><span id="line-135">     * Returns a list of all versions that match the search constraints.</span>
+<span class="source-line-no">136</span><span id="line-136">     * @return A list of versions. This list may be empty but is never null.</span>
+<span class="source-line-no">137</span><span id="line-137">     * @throws IOException If the underlying code encounters an IO problem (e.g. no network connection).</span>
+<span class="source-line-no">138</span><span id="line-138">     */</span>
+<span class="source-line-no">139</span><span id="line-139">    public LinkedList&lt;String&gt; findAll() throws IOException {</span>
+<span class="source-line-no">140</span><span id="line-140">        return loader.findAllVersions(this)</span>
+<span class="source-line-no">141</span><span id="line-141">                .stream()</span>
+<span class="source-line-no">142</span><span id="line-142">                .map(Version::toString)</span>
+<span class="source-line-no">143</span><span id="line-143">                .collect(Collectors.toCollection(LinkedList::new));</span>
 <span class="source-line-no">144</span><span id="line-144">    }</span>
-<span class="source-line-no">145</span><span id="line-145">}</span>
+<span class="source-line-no">145</span><span id="line-145"></span>
+<span class="source-line-no">146</span><span id="line-146">    /**</span>
+<span class="source-line-no">147</span><span id="line-147">     * Returns the best match for the given version contraints.</span>
+<span class="source-line-no">148</span><span id="line-148">     * @return The best match for the given version constraints. Can be {@link Optional#empty()} if no version matches.</span>
+<span class="source-line-no">149</span><span id="line-149">     * @throws IOException If the underlying code encounters an IO problem (e.g. no network connection).</span>
+<span class="source-line-no">150</span><span id="line-150">     */</span>
+<span class="source-line-no">151</span><span id="line-151">    public Optional&lt;String&gt; findBestMatch() throws IOException {</span>
+<span class="source-line-no">152</span><span id="line-152">        LinkedList&lt;String&gt; versions = findAll();</span>
+<span class="source-line-no">153</span><span id="line-153">        return versions.isEmpty() ? Optional.empty() : Optional.of(versions.getLast());</span>
+<span class="source-line-no">154</span><span id="line-154">    }</span>
+<span class="source-line-no">155</span><span id="line-155">}</span>
 
 
 
