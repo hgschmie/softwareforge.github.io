@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MavenVersionMatchBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">maven-loader</a> &gt; <a href="index.source.html" class="el_package">de.softwareforge.testing.maven</a> &gt; <span class="el_source">MavenVersionMatchBuilder.java</span></div><h1>MavenVersionMatchBuilder.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package de.softwareforge.testing.maven;
+
+import static java.util.Objects.requireNonNull;
+
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.eclipse.aether.version.Version;
+
+/**
+ * A builder class to control better what versions should be returned.
+ */
+public final class MavenVersionMatchBuilder {
+
+    private final MavenArtifactLoader loader;
+    private final String groupId;
+    private final String artifactId;
+
+<span class="fc" id="L35">    private VersionStrategy versionStrategy = VersionStrategy.partialMatch(&quot;&quot;);</span>
+
+<span class="fc" id="L37">    private String extension = &quot;jar&quot;;</span>
+<span class="fc" id="L38">    private boolean includeSnapshots = true;</span>
+
+<span class="fc" id="L40">    MavenVersionMatchBuilder(MavenArtifactLoader loader, String groupId, String artifactId) {</span>
+<span class="fc" id="L41">        this.loader = loader;</span>
+<span class="fc" id="L42">        this.groupId = groupId;</span>
+<span class="fc" id="L43">        this.artifactId = artifactId;</span>
+<span class="fc" id="L44">    }</span>
+
+    /**
+     * Support a partial match to the given version string. If the value is empty, any version will match. Otherwise, the version must be either exact or a
+     * prefix to match a version.
+     *
+     * @param partial The partial version to match.
+     * @return the builder
+     */
+    public MavenVersionMatchBuilder partialMatch(String partial) {
+<span class="fc" id="L54">        this.versionStrategy = VersionStrategy.partialMatch(partial);</span>
+<span class="fc" id="L55">        return this;</span>
+    }
+
+    /**
+     * Support an exact match to a version.
+     *
+     * @param partial The version to match.
+     * @return the builder
+     */
+    public MavenVersionMatchBuilder exactMatch(String partial) {
+<span class="fc" id="L65">        this.versionStrategy = VersionStrategy.exactMatch(partial);</span>
+<span class="fc" id="L66">        return this;</span>
+    }
+
+    /**
+     * Supports semantic versioning, match the major version.
+     *
+     * @param major the major version to match.
+     * @return the builder
+     */
+    public MavenVersionMatchBuilder semVerMajor(int major) {
+<span class="fc" id="L76">        this.versionStrategy = VersionStrategy.semVerMatchMajor(major);</span>
+<span class="fc" id="L77">        return this;</span>
+    }
+
+    /**
+     * Supports semantic versioning, match the major and minor version.
+     *
+     * @param major the major version to match.
+     * @param minor the minor version to match.
+     * @return the builder
+     */
+    public MavenVersionMatchBuilder semVerMinor(int major, int minor) {
+<span class="fc" id="L88">        this.versionStrategy = VersionStrategy.semVerMatchMinor(major, minor);</span>
+<span class="fc" id="L89">        return this;</span>
+    }
+
+    /**
+     * Set the extension to consider. Default is &quot;jar&quot;.
+     *
+     * @param extension Sets the extension.
+     * @return the builder
+     */
+    public MavenVersionMatchBuilder extension(String extension) {
+<span class="fc" id="L99">        this.extension = requireNonNull(extension, &quot;extension is null&quot;);</span>
+<span class="fc" id="L100">        return this;</span>
+    }
+
+    /**
+     * If true, snapshots are included in the results.
+     *
+     * @param includeSnapshots If true, include snapshots in the results. Default is {@code true}.
+     * @return the builder
+     */
+    public MavenVersionMatchBuilder includeSnapshots(boolean includeSnapshots) {
+<span class="fc" id="L110">        this.includeSnapshots = includeSnapshots;</span>
+<span class="fc" id="L111">        return this;</span>
+    }
+
+    String groupId() {
+<span class="fc" id="L115">        return groupId;</span>
+    }
+
+    String artifactId() {
+<span class="fc" id="L119">        return artifactId;</span>
+    }
+
+    VersionStrategy versionStrategy() {
+<span class="fc" id="L123">        return versionStrategy;</span>
+    }
+
+    String extension() {
+<span class="fc" id="L127">        return extension;</span>
+    }
+
+    boolean includeSnapshots() {
+<span class="fc" id="L131">        return includeSnapshots;</span>
+    }
+
+    public LinkedList&lt;String&gt; findAll() throws IOException {
+<span class="fc" id="L135">        return loader.findAllVersions(this)</span>
+<span class="fc" id="L136">                .stream()</span>
+<span class="fc" id="L137">                .map(Version::toString)</span>
+<span class="fc" id="L138">                .collect(Collectors.toCollection(LinkedList::new));</span>
+    }
+
+    public Optional&lt;String&gt; findBestMatch() throws IOException {
+<span class="fc" id="L142">        LinkedList&lt;String&gt; versions = findAll();</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        return versions.isEmpty() ? Optional.empty() : Optional.of(versions.getLast());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

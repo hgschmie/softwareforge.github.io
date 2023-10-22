@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MavenArtifactLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">maven-loader</a> &gt; <a href="index.source.html" class="el_package">de.softwareforge.testing.maven</a> &gt; <span class="el_source">MavenArtifactLoader.java</span></div><h1>MavenArtifactLoader.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package de.softwareforge.testing.maven;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
+import org.apache.maven.settings.Profile;
+import org.apache.maven.settings.Repository;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.building.DefaultSettingsBuilder;
+import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
+import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
+import org.apache.maven.settings.building.SettingsBuildingException;
+import org.apache.maven.settings.building.SettingsBuildingRequest;
+import org.apache.maven.settings.building.SettingsBuildingResult;
+import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.RepositoryException;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
+import org.eclipse.aether.impl.DefaultServiceLocator;
+import org.eclipse.aether.repository.LocalRepository;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.resolution.VersionRangeRequest;
+import org.eclipse.aether.resolution.VersionRangeResolutionException;
+import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
+import org.eclipse.aether.spi.connector.transport.TransporterFactory;
+import org.eclipse.aether.spi.locator.ServiceLocator;
+import org.eclipse.aether.transport.file.FileTransporterFactory;
+import org.eclipse.aether.transport.http.HttpTransporterFactory;
+import org.eclipse.aether.version.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * A quick and dirty artifact loader. Downloads published artifacts from the Maven repository system.
+ * &lt;p&gt;
+ * The loader respects the local maven settings (repositories, mirrors etc.) if present. If no configuration is found, a hard-coded reference to &lt;a
+ * href=&quot;https://repo.maven.apache.org/maven2/&quot;&gt;Maven Central&lt;/a&gt; is used.
+ */
+public final class MavenArtifactLoader {
+
+<span class="fc" id="L72">    private static final Logger LOG = LoggerFactory.getLogger(MavenArtifactLoader.class);</span>
+
+<span class="fc" id="L74">    private static final RemoteRepository CENTRAL_REPO = new RemoteRepository.Builder(&quot;central&quot;, &quot;default&quot;, &quot;https://repo.maven.apache.org/maven2/&quot;).build();</span>
+
+<span class="fc" id="L76">    private static final String USER_HOME = System.getProperty(&quot;user.home&quot;);</span>
+<span class="fc" id="L77">    private static final File USER_MAVEN_HOME = new File(USER_HOME, &quot;.m2&quot;);</span>
+<span class="fc" id="L78">    private static final String ENV_M2_HOME = System.getenv(&quot;M2_HOME&quot;);</span>
+
+<span class="fc" id="L80">    private static final File DEFAULT_USER_SETTINGS_FILE = new File(USER_MAVEN_HOME, &quot;settings.xml&quot;);</span>
+<span class="fc" id="L81">    private static final File DEFAULT_USER_REPOSITORY = new File(USER_MAVEN_HOME, &quot;repository&quot;);</span>
+<span class="fc" id="L82">    private static final File DEFAULT_GLOBAL_SETTINGS_FILE =</span>
+<span class="fc" id="L83">            new File(System.getProperty(&quot;maven.home&quot;, Objects.requireNonNullElse(ENV_M2_HOME, &quot;&quot;)), &quot;conf/settings.xml&quot;);</span>
+
+    private final RepositorySystem repositorySystem;
+    private final RepositorySystemSession mavenSession;
+    private final List&lt;RemoteRepository&gt; remoteRepositories;
+
+    private final String extension;
+
+    /**
+     * Creates a new artifact loader for 'jar' artifacts.
+     */
+    public MavenArtifactLoader() {
+<span class="fc" id="L95">        this(&quot;jar&quot;);</span>
+<span class="fc" id="L96">    }</span>
+
+    /**
+     * Creates a new artifact loader for artifacts.
+     *
+     * @param extension The artifact extension. Must not be null.
+     */
+<span class="fc" id="L103">    public MavenArtifactLoader(String extension) {</span>
+<span class="fc" id="L104">        this.extension = requireNonNull(extension, &quot;extension is null&quot;);</span>
+
+        @SuppressWarnings(&quot;deprecation&quot;)
+<span class="fc" id="L107">        ServiceLocator serviceLocator = createServiceLocator();</span>
+<span class="fc" id="L108">        this.repositorySystem = serviceLocator.getService(RepositorySystem.class);</span>
+
+        try {
+<span class="fc" id="L111">            Settings settings = createSettings();</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">            File localRepositoryLocation = settings.getLocalRepository() != null ? new File(settings.getLocalRepository()) : DEFAULT_USER_REPOSITORY;</span>
+<span class="fc" id="L113">            LocalRepository localRepository = new LocalRepository(localRepositoryLocation);</span>
+<span class="fc" id="L114">            this.remoteRepositories = extractRemoteRepositories(settings);</span>
+
+<span class="fc" id="L116">            DefaultRepositorySystemSession mavenSession = MavenRepositorySystemUtils.newSession();</span>
+
+<span class="fc" id="L118">            this.mavenSession = mavenSession.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(mavenSession, localRepository));</span>
+
+<span class="nc" id="L120">        } catch (SettingsBuildingException e) {</span>
+<span class="nc" id="L121">            throw new IllegalStateException(&quot;Could not load maven settings:&quot;, e);</span>
+<span class="fc" id="L122">        }</span>
+<span class="fc" id="L123">    }</span>
+
+    /**
+     * Create a new version match builder to retrieve an artifact.
+     *
+     * @param groupId    The Apache Maven Group Id. Must not be null.
+     * @param artifactId The Apache Maven Artifact Id. Must not be null.
+     * @return A {@link MavenVersionMatchBuilder} instance
+     */
+    public MavenVersionMatchBuilder builder(String groupId, String artifactId) {
+<span class="fc" id="L133">        requireNonNull(groupId, &quot;groupId is null&quot;);</span>
+<span class="fc" id="L134">        requireNonNull(artifactId, &quot;artifactId is null&quot;);</span>
+
+<span class="fc" id="L136">        return new MavenVersionMatchBuilder(this, groupId, artifactId);</span>
+    }
+
+    /**
+     * Download an artifact file from the Maven repository system.
+     *
+     * @param groupId    The Apache Maven Group Id. Must not be null.
+     * @param artifactId The Apache Maven Artifact Id. Must not be null.
+     * @param version    The Apache Maven Artifact version. Must not be null.
+     * @return A file representing a successfully downloaded artifact.
+     * @throws IOException If the artifact could not be found or an IO problem happened while locating or downloading the artifact.
+     */
+    public File getArtifactFile(String groupId, String artifactId, String version) throws IOException {
+<span class="fc" id="L149">        requireNonNull(groupId, &quot;groupId is null&quot;);</span>
+<span class="fc" id="L150">        requireNonNull(artifactId, &quot;artifactId is null&quot;);</span>
+<span class="fc" id="L151">        requireNonNull(version, &quot;version is null&quot;);</span>
+
+<span class="fc" id="L153">        ArtifactRequest artifactRequest = new ArtifactRequest();</span>
+<span class="fc" id="L154">        artifactRequest.setArtifact(new DefaultArtifact(groupId, artifactId, extension, version));</span>
+<span class="fc" id="L155">        artifactRequest.setRepositories(this.remoteRepositories);</span>
+        try {
+<span class="fc" id="L157">            ArtifactResult artifactResult = this.repositorySystem.resolveArtifact(mavenSession, artifactRequest);</span>
+<span class="fc" id="L158">            Artifact artifact = artifactResult.getArtifact();</span>
+<span class="fc" id="L159">            return artifact.getFile();</span>
+<span class="nc" id="L160">        } catch (RepositoryException e) {</span>
+<span class="nc" id="L161">            throw new IOException(e);</span>
+        }
+    }
+
+    /**
+     * Find a matching artifact version from a partially defined artifact version.
+     * &lt;p&gt;
+     * Any located artifact in the repository system is compared to the version given.
+     * &lt;br&gt;
+     * Using this method is equivalent to calling
+     * &lt;pre&gt;
+     *  builder(groupId, artifactId)
+     *                 .partialMatch(version)
+     *                 .extension(extension)
+     *                 .includeSnapshots(true)
+     *                 .findBestMatch();
+     * &lt;/pre&gt;
+     *
+     * but will throw an IOException if no version could be found.
+     *
+     * @param groupId    The Apache Maven Group Id. Must not be null.
+     * @param artifactId The Apache Maven Artifact Id. Must not be null.
+     * @param version    A partial version string. Must not be null. An empty string matches any version.
+     * @return The latest version that matches the partial version string. It either starts with the partial version string given (an empty version string
+     * matches any version) or is exactly the provided version.
+     * @throws IOException If an IO problem happened during artifact download or no versions were found during resolution.
+     */
+    public String findLatestVersion(String groupId, String artifactId, String version) throws IOException {
+<span class="fc" id="L189">        requireNonNull(groupId, &quot;groupId is null&quot;);</span>
+<span class="fc" id="L190">        requireNonNull(artifactId, &quot;artifactId is null&quot;);</span>
+<span class="fc" id="L191">        requireNonNull(version, &quot;version is null&quot;);</span>
+<span class="fc" id="L192">        return builder(groupId, artifactId)</span>
+<span class="fc" id="L193">                .partialMatch(version)</span>
+<span class="fc" id="L194">                .extension(extension)</span>
+<span class="fc" id="L195">                .includeSnapshots(true)</span>
+<span class="fc" id="L196">                .findBestMatch()</span>
+<span class="pc" id="L197">                .orElseThrow(() -&gt; new IOException(format(&quot;No suitable candidate for %s:%s:%s found!&quot;, groupId, artifactId, version)));</span>
+    }
+
+    SortedSet&lt;Version&gt; findAllVersions(MavenVersionMatchBuilder builder) throws IOException {
+
+<span class="fc" id="L202">        Artifact artifact = new DefaultArtifact(builder.groupId(), builder.artifactId(), builder.extension(), &quot;[0,)&quot;);</span>
+
+<span class="fc" id="L204">        VersionRangeRequest rangeRequest = new VersionRangeRequest();</span>
+<span class="fc" id="L205">        rangeRequest.setArtifact(artifact);</span>
+<span class="fc" id="L206">        rangeRequest.setRepositories(this.remoteRepositories);</span>
+
+        try {
+<span class="fc" id="L209">            VersionRangeResult rangeResult = this.repositorySystem.resolveVersionRange(mavenSession, rangeRequest);</span>
+<span class="fc" id="L210">            SortedSet&lt;Version&gt; resultBuilder = new TreeSet&lt;&gt;();</span>
+<span class="fc" id="L211">            List&lt;Version&gt; artifactVersions = rangeResult.getVersions();</span>
+<span class="fc" id="L212">            VersionStrategy versionStrategy = builder.versionStrategy();</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">            if (artifactVersions != null) {</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">                for (Version artifactVersion : artifactVersions) {</span>
+<span class="fc" id="L215">                    boolean isSnapshot = artifactVersion.toString().endsWith(&quot;-SNAPSHOT&quot;);</span>
+<span class="fc" id="L216">                    boolean match = versionStrategy.matchVersion(artifactVersion);</span>
+
+                    // remove match if snapshots are not requested but the version is a snapshot
+<span class="fc bfc" id="L219" title="All 2 branches covered.">                    if (isSnapshot) {</span>
+<span class="fc" id="L220">                        match &amp;= builder.includeSnapshots();</span>
+                    }
+
+<span class="fc bfc" id="L223" title="All 2 branches covered.">                    if (match) {</span>
+<span class="fc" id="L224">                        resultBuilder.add(artifactVersion);</span>
+                    }
+<span class="fc" id="L226">                }</span>
+            }
+<span class="fc" id="L228">            return Collections.unmodifiableSortedSet(resultBuilder);</span>
+<span class="nc" id="L229">        } catch (VersionRangeResolutionException e) {</span>
+<span class="nc" id="L230">            throw new IOException(format(&quot;Could not resolve version range: %s&quot;, rangeRequest), e);</span>
+        }
+    }
+
+
+    @SuppressWarnings(&quot;deprecation&quot;)
+    private static ServiceLocator createServiceLocator() {
+<span class="fc" id="L237">        DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();</span>
+
+<span class="fc" id="L239">        locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);</span>
+<span class="fc" id="L240">        locator.addService(TransporterFactory.class, FileTransporterFactory.class);</span>
+<span class="fc" id="L241">        locator.addService(TransporterFactory.class, HttpTransporterFactory.class);</span>
+
+<span class="fc" id="L243">        locator.setErrorHandler(new DefaultServiceLocator.ErrorHandler() {</span>
+            @Override
+            public void serviceCreationFailed(Class&lt;?&gt; type, Class&lt;?&gt; impl, Throwable e) {
+<span class="nc" id="L246">                LOG.error(format(&quot;Could not create instance of %s (implementation %s): &quot;, type.getSimpleName(), impl.getSimpleName()), e);</span>
+<span class="nc" id="L247">            }</span>
+        });
+
+<span class="fc" id="L250">        return locator;</span>
+    }
+
+    private static Settings createSettings() throws SettingsBuildingException {
+<span class="fc" id="L254">        SettingsBuildingRequest settingsBuildingRequest = new DefaultSettingsBuildingRequest()</span>
+<span class="fc" id="L255">                .setSystemProperties(System.getProperties())</span>
+<span class="fc" id="L256">                .setUserSettingsFile(DEFAULT_USER_SETTINGS_FILE)</span>
+<span class="fc" id="L257">                .setGlobalSettingsFile(DEFAULT_GLOBAL_SETTINGS_FILE);</span>
+
+<span class="fc" id="L259">        DefaultSettingsBuilderFactory settingBuilderFactory = new DefaultSettingsBuilderFactory();</span>
+<span class="fc" id="L260">        DefaultSettingsBuilder settingsBuilder = settingBuilderFactory.newInstance();</span>
+<span class="fc" id="L261">        SettingsBuildingResult settingsBuildingResult = settingsBuilder.build(settingsBuildingRequest);</span>
+
+<span class="fc" id="L263">        return settingsBuildingResult.getEffectiveSettings();</span>
+    }
+
+    private static List&lt;RemoteRepository&gt; extractRemoteRepositories(Settings settings) {
+<span class="fc" id="L267">        Map&lt;String, Profile&gt; profiles = settings.getProfilesAsMap();</span>
+<span class="fc" id="L268">        List&lt;RemoteRepository&gt; builder = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L270">        boolean foundRepository = false;</span>
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        for (String profileName : settings.getActiveProfiles()) {</span>
+<span class="fc" id="L272">            Profile profile = profiles.get(profileName);</span>
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">            if (profile != null) {</span>
+<span class="fc" id="L274">                List&lt;Repository&gt; repositories = profile.getRepositories();</span>
+<span class="pc bpc" id="L275" title="1 of 2 branches missed.">                if (repositories != null) {</span>
+<span class="fc bfc" id="L276" title="All 2 branches covered.">                    for (Repository repo : repositories) {</span>
+<span class="fc" id="L277">                        builder.add(new RemoteRepository.Builder(repo.getId(), &quot;default&quot;, repo.getUrl()).build());</span>
+<span class="fc" id="L278">                        foundRepository = true;</span>
+<span class="fc" id="L279">                    }</span>
+                }
+            }
+<span class="fc" id="L282">        }</span>
+
+<span class="pc bpc" id="L284" title="3 of 4 branches missed.">        if (!foundRepository &amp;&amp; !settings.isOffline()) {</span>
+<span class="nc" id="L285">            builder.add(CENTRAL_REPO);</span>
+        }
+
+<span class="fc" id="L288">        return Collections.unmodifiableList(builder);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -45,9 +45,12 @@
       <li><a href="surefire-report.html">Surefire</a></li>
       <li><a href="checkstyle.html">Checkstyle</a></li>
       <li><a href="xref/index.html">Source Xref</a></li>
+      <li><a href="xref-test/index.html">Test Source Xref</a></li>
       <li><a href="pmd.html">PMD</a></li>
       <li class="active"><a>SpotBugs</a></li>
+      <li><a href="jacoco/index.html">JaCoCo</a></li>
       <li><a href="apidocs/index.html">Javadoc</a></li>
+      <li><a href="testapidocs/index.html">Test Javadoc</a></li>
      </ul></li>
   </ul>
           </nav>
@@ -75,15 +78,32 @@
 <th>Errors</th>
 <th>Missing Classes</th></tr>
 <tr class="b">
-<td>2</td>
-<td>0</td>
+<td>5</td>
+<td>1</td>
 <td>0</td>
 <td>0</td></tr></table></section><section>
 <h1>Files</h1>
 <table class="table table-striped">
 <tr class="a">
 <th>Class</th>
-<th>Bugs</th></tr></table></section>
+<th>Bugs</th></tr>
+<tr class="b">
+<td><a href="#de.softwareforge.testing.maven.VersionStrategy$SemVerVersionStrategy">de.softwareforge.testing.maven.VersionStrategy$SemVerVersionStrategy</a></td>
+<td>1</td></tr></table></section><a name="de.softwareforge.testing.maven.VersionStrategy$SemVerVersionStrategy"></a><section>
+<h2>de.softwareforge.testing.maven.VersionStrategy$SemVerVersionStrategy</h2>
+<table class="table table-striped">
+<tr class="a">
+<th>Bug</th>
+<th>Category</th>
+<th>Details</th>
+<th>Line</th>
+<th>Priority</th></tr>
+<tr class="b">
+<td>Exception thrown in class de.softwareforge.testing.maven.VersionStrategy$SemVerVersionStrategy at new de.softwareforge.testing.maven.VersionStrategy$SemVerVersionStrategy(int, int) will leave the constructor. The object under construction remains partially initialized and may be vulnerable to Finalizer attacks.</td>
+<td>BAD_PRACTICE</td>
+<td><a class="externalLink" href="https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#CT_CONSTRUCTOR_THROW">CT_CONSTRUCTOR_THROW</a></td>
+<td><a href="./xref/de/softwareforge/testing/maven/VersionStrategy.html#L66">66</a></td>
+<td>Medium</td></tr></table></section>
         </main>
       </div>
     </div>
