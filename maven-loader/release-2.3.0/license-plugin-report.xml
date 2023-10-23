@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<licensePluginReport goal="CHECK" timestamp="1698023175357">
+    <module artifactId="maven-loader" groupId="de.softwareforge.testing" version="2.3.0"/>
+    <files>
+        <file path="pom.xml" result="PRESENT"/>
+        <file path="src/main/java/de/softwareforge/testing/maven/MavenArtifactLoader.java" result="PRESENT"/>
+        <file path="src/main/java/de/softwareforge/testing/maven/MavenVersionMatchBuilder.java" result="PRESENT"/>
+        <file path="src/main/java/de/softwareforge/testing/maven/VersionStrategy.java" result="PRESENT"/>
+        <file path="src/site/site.xml" result="PRESENT"/>
+        <file path="src/test/java/de/softwareforge/testing/maven/TestMavenArtifactLoader.java" result="PRESENT"/>
+    </files>
+</licensePluginReport>
