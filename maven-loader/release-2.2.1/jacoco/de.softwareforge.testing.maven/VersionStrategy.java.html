@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VersionStrategy.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">maven-loader</a> &gt; <a href="index.source.html" class="el_package">de.softwareforge.testing.maven</a> &gt; <span class="el_source">VersionStrategy.java</span></div><h1>VersionStrategy.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package de.softwareforge.testing.maven;
+
+import org.eclipse.aether.util.version.GenericVersionScheme;
+import org.eclipse.aether.version.InvalidVersionSpecificationException;
+import org.eclipse.aether.version.Version;
+import org.eclipse.aether.version.VersionRange;
+
+interface VersionStrategy {
+
+    static VersionStrategy partialMatch(String partial) {
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        return artifactVersion -&gt; partial.isEmpty()</span>
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">                || artifactVersion.toString().equals(partial)</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">                || artifactVersion.toString().startsWith(partial + '.');</span>
+    }
+
+    static VersionStrategy exactMatch(String version) {
+<span class="fc" id="L31">        return artifactVersion -&gt; artifactVersion.toString().equals(version);</span>
+    }
+
+    static VersionStrategy semVerMatchMajor(int major) {
+<span class="fc" id="L35">        return new SemVerVersionStrategy(major, -1);</span>
+    }
+
+    static VersionStrategy semVerMatchMinor(int major, int minor) {
+<span class="fc" id="L39">        return new SemVerVersionStrategy(major, minor);</span>
+    }
+
+    boolean matchVersion(Version version);
+
+    class SemVerVersionStrategy implements VersionStrategy {
+
+<span class="fc" id="L46">        private static final GenericVersionScheme SCHEME = new GenericVersionScheme();</span>
+
+        private final VersionRange range;
+
+<span class="fc" id="L50">        SemVerVersionStrategy(int major, int minor) {</span>
+
+<span class="fc" id="L52">            StringBuilder matchString = new StringBuilder(&quot;[&quot;)</span>
+<span class="fc" id="L53">                    .append(major)</span>
+<span class="fc" id="L54">                    .append('.');</span>
+
+<span class="fc bfc" id="L56" title="All 2 branches covered.">            if (minor &gt; 0) {</span>
+<span class="fc" id="L57">                matchString.append(minor)</span>
+<span class="fc" id="L58">                        .append('.');</span>
+            }
+
+<span class="fc" id="L61">            matchString.append(&quot;*]&quot;);</span>
+
+            try {
+<span class="fc" id="L64">                this.range = SCHEME.parseVersionRange(matchString.toString());</span>
+<span class="nc" id="L65">            } catch (InvalidVersionSpecificationException e) {</span>
+<span class="nc" id="L66">                throw new IllegalArgumentException(e);</span>
+<span class="fc" id="L67">            }</span>
+<span class="fc" id="L68">        }</span>
+
+        @Override
+        public boolean matchVersion(Version version) {
+<span class="fc" id="L72">            return range.containsVersion(version);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
