@@ -1,0 +1,47 @@
+.version-item {
+  vertical-align: middle;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.version-item:last-child {
+  border-bottom: none;
+}
+
+/* Make boxes equal height */
+.columns {
+  display: flex;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.box {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.footer {
+  margin-top: 2rem;
+  padding: 1.5rem;
+}
+
+@media screen and (max-width: 768px) {
+  .columns {
+    display: block;
+  }
+
+  .column {
+    margin-bottom: 1rem;
+  }
+}
+
+tr.version-item td {
+  vertical-align: middle;
+  text-align: center;
+}

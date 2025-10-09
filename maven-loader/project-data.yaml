@@ -1,0 +1,35 @@
+title: maven-loader
+subtitle: Standalone maven repository loader - download any artifact from the maven repository system.
+info: |
+  Download any artifact from the Maven repository system.
+  Standalone loader without any dependencies except the logging system.
+theme:
+  project: "#182fdd"
+  project_text: "#ffffff"
+  info: "#cccccc"
+  info_text: "#000000"
+  version: "#66d1b2"
+  version_text: "#000000"
+
+releasedVersions:
+  - version: 2.4.1
+    date: 2025-10-08
+    url: https://softwareforge.de/maven-loader/release-2.4.1
+  - version: 2.4.0
+    date: 2024-09-11
+    url: https://softwareforge.de/maven-loader/release-2.4.0
+  - version: 2.3.0
+    date: 2023-10-22
+    url: https://softwareforge.de/maven-loader/release-2.3.0
+
+developmentInfo:
+  - name: Latest Development Build
+    url: https://softwareforge.de/maven-loader/dev
+  - name: Changelog
+    url: https://softwareforge.de/maven-loader/dev
+  - name: GitHub Repository
+    url: https://github.com/hgschmie/maven-loader
+
+developmentBadges:
+  - img: https://github.com/hgschmie/maven-loader/actions/workflows/master-cd.yml/badge.svg
+    url: https://github.com/hgschmie/maven-loader/actions/workflows/master-cd.yml
