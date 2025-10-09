@@ -19,58 +19,59 @@ import org.eclipse.aether.version.InvalidVersionSpecificationException;
 import org.eclipse.aether.version.Version;
 import org.eclipse.aether.version.VersionRange;
 
+@SuppressWarnings(&quot;PMD.ImplicitFunctionalInterface&quot;)
 interface VersionStrategy {
 
     static VersionStrategy partialMatch(String partial) {
-<span class="fc bfc" id="L25" title="All 2 branches covered.">        return artifactVersion -&gt; partial.isEmpty()</span>
-<span class="pc bpc" id="L26" title="1 of 2 branches missed.">                || artifactVersion.toString().equals(partial)</span>
-<span class="fc bfc" id="L27" title="All 2 branches covered.">                || artifactVersion.toString().startsWith(partial + '.');</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        return artifactVersion -&gt; partial.isEmpty()</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">                || artifactVersion.toString().equals(partial)</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">                || artifactVersion.toString().startsWith(partial + '.');</span>
     }
 
     static VersionStrategy exactMatch(String version) {
-<span class="fc" id="L31">        return artifactVersion -&gt; artifactVersion.toString().equals(version);</span>
+<span class="fc" id="L32">        return artifactVersion -&gt; artifactVersion.toString().equals(version);</span>
     }
 
     static VersionStrategy semVerMatchMajor(int major) {
-<span class="fc" id="L35">        return new SemVerVersionStrategy(major, -1);</span>
+<span class="fc" id="L36">        return new SemVerVersionStrategy(major, -1);</span>
     }
 
     static VersionStrategy semVerMatchMinor(int major, int minor) {
-<span class="fc" id="L39">        return new SemVerVersionStrategy(major, minor);</span>
+<span class="fc" id="L40">        return new SemVerVersionStrategy(major, minor);</span>
     }
 
     boolean matchVersion(Version version);
 
     class SemVerVersionStrategy implements VersionStrategy {
 
-<span class="fc" id="L46">        private static final GenericVersionScheme SCHEME = new GenericVersionScheme();</span>
+<span class="fc" id="L47">        private static final GenericVersionScheme SCHEME = new GenericVersionScheme();</span>
 
         private final VersionRange range;
 
-<span class="fc" id="L50">        SemVerVersionStrategy(int major, int minor) {</span>
+<span class="fc" id="L51">        SemVerVersionStrategy(int major, int minor) {</span>
 
-<span class="fc" id="L52">            StringBuilder matchString = new StringBuilder(&quot;[&quot;)</span>
-<span class="fc" id="L53">                    .append(major)</span>
-<span class="fc" id="L54">                    .append('.');</span>
+<span class="fc" id="L53">            StringBuilder matchString = new StringBuilder(&quot;[&quot;)</span>
+<span class="fc" id="L54">                    .append(major)</span>
+<span class="fc" id="L55">                    .append('.');</span>
 
-<span class="fc bfc" id="L56" title="All 2 branches covered.">            if (minor &gt; 0) {</span>
-<span class="fc" id="L57">                matchString.append(minor)</span>
-<span class="fc" id="L58">                        .append('.');</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">            if (minor &gt; 0) {</span>
+<span class="fc" id="L58">                matchString.append(minor)</span>
+<span class="fc" id="L59">                        .append('.');</span>
             }
 
-<span class="fc" id="L61">            matchString.append(&quot;*]&quot;);</span>
+<span class="fc" id="L62">            matchString.append(&quot;*]&quot;);</span>
 
             try {
-<span class="fc" id="L64">                this.range = SCHEME.parseVersionRange(matchString.toString());</span>
-<span class="nc" id="L65">            } catch (InvalidVersionSpecificationException e) {</span>
-<span class="nc" id="L66">                throw new IllegalArgumentException(e);</span>
-<span class="fc" id="L67">            }</span>
-<span class="fc" id="L68">        }</span>
+<span class="fc" id="L65">                this.range = SCHEME.parseVersionRange(matchString.toString());</span>
+<span class="nc" id="L66">            } catch (InvalidVersionSpecificationException e) {</span>
+<span class="nc" id="L67">                throw new IllegalArgumentException(e);</span>
+<span class="fc" id="L68">            }</span>
+<span class="fc" id="L69">        }</span>
 
         @Override
         public boolean matchVersion(Version version) {
-<span class="fc" id="L72">            return range.containsVersion(version);</span>
+<span class="fc" id="L73">            return range.containsVersion(version);</span>
         }
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
