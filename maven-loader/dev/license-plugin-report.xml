@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<licensePluginReport goal="CHECK" timestamp="1759983962677">
+<licensePluginReport goal="CHECK" timestamp="1759986279566">
     <module artifactId="maven-loader" groupId="de.softwareforge.testing" version="2.4.2-SNAPSHOT"/>
     <files>
         <file path="pom.xml" result="PRESENT"/>
+        <file path="src/it/settings.xml" result="PRESENT"/>
+        <file path="src/it/test-inline-jar/invoker.properties" result="PRESENT"/>
+        <file path="src/it/test-inline-jar/pom.xml" result="PRESENT"/>
         <file path="src/main/java/de/softwareforge/testing/maven/MavenArtifactLoader.java" result="PRESENT"/>
         <file path="src/main/java/de/softwareforge/testing/maven/MavenVersionMatchBuilder.java" result="PRESENT"/>
         <file path="src/main/java/de/softwareforge/testing/maven/VersionStrategy.java" result="PRESENT"/>
