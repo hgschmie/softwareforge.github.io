@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<licensePluginReport goal="CHECK" timestamp="1760329274125">
-    <module artifactId="maven-loader" groupId="de.softwareforge.testing" version="2.4.2"/>
+<licensePluginReport goal="CHECK" timestamp="1760329294638">
+    <module artifactId="maven-loader" groupId="de.softwareforge.testing" version="2.4.3-SNAPSHOT"/>
     <files>
         <file path="pom.xml" result="PRESENT"/>
         <file path="src/it/settings.xml" result="PRESENT"/>
