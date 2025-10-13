@@ -12,6 +12,9 @@ theme:
   version_text: "#000000"
 
 releasedVersions:
+  - version: 2.4.2
+    date: 2025-10-12
+    url: https://softwareforge.de/maven-loader/release-2.4.2
   - version: 2.4.1
     date: 2025-10-08
     url: https://softwareforge.de/maven-loader/release-2.4.1
